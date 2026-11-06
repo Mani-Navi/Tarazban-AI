@@ -68,13 +68,28 @@ def _clean_json_output(raw_text: str) -> str:
     return cleaned
 
 
+def _get_clean_api_key() -> str:
+    """خواندن کلید در لحظه اجرا و حذف هرگونه فاصله یا کوتیشن اضافی"""
+    for env_name in ("OPENROUTER_API_KEY", "GEMINI_API_KEY", "GROQ_API_KEY", "AI_API_KEY"):
+        val = os.getenv(env_name, "").strip()
+        if val:
+            val = val.strip("\"'").strip()
+            if val.lower().startswith("bearer "):
+                val = val[7:].strip()
+            return val
+    return ""
+
+
 def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
-    if CLOUD_API_KEY:
+    api_key = _get_clean_api_key()
+    print(f"🔑 [API Key Check] Key found: {bool(api_key)} | Length: {len(api_key)} | Prefix: '{api_key[:8]}...'")
+
+    if api_key:
         b64_img = _encode_image(image_bytes) if image_bytes else None
 
-        # حالت ۱: اگر کلید Google Gemini (شروع با AIza) باشد — فوق‌العاده سریع (۲ ثانیه) و رایگان
-        if CLOUD_API_KEY.startswith("AIza"):
-            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={CLOUD_API_KEY}"
+        # حالت ۱: کلید Google Gemini (شروع با AIza)
+        if api_key.startswith("AIza"):
+            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
             parts = [{"text": prompt + "\nفقط خروجی JSON خالص برگردان."}]
             if b64_img:
                 parts.append({"inline_data": {"mime_type": "image/png", "data": b64_img}})
@@ -88,9 +103,9 @@ def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
             text = res.json()["candidates"][0]["content"]["parts"][0]["text"]
             return _clean_json_output(text)
 
-        # حالت ۲: اگر کلید Groq (شروع با gsk_) باشد — فوق‌العاده سریع (۱.۵ ثانیه) و رایگان
-        if CLOUD_API_KEY.startswith("gsk_"):
-            headers = {"Authorization": f"Bearer {CLOUD_API_KEY}", "Content-Type": "application/json"}
+        # حالت ۲: کلید Groq (شروع با gsk_)
+        if api_key.startswith("gsk_"):
+            headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
             user_content = (
                 [
                     {"type": "text", "text": prompt + "\nفقط خروجی JSON خالص برگردان."},
@@ -111,7 +126,13 @@ def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
             return _clean_json_output(res.json()["choices"][0]["message"]["content"])
 
         # حالت ۳: کلید OpenRouter (شروع با sk-or-)
-        headers = {"Authorization": f"Bearer {CLOUD_API_KEY}", "Content-Type": "application/json"}
+        openrouter_url = "https://openrouter.ai/api/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "HTTP-Referer": "https://tarazban-ai.onrender.com",
+            "X-Title": "TarazBan AI",
+            "Content-Type": "application/json",
+        }
         user_content = (
             [
                 {"type": "text", "text": prompt + "\nفقط خروجی JSON خالص برگردان."},
@@ -120,20 +141,23 @@ def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
             if b64_img
             else prompt + "\nفقط خروجی JSON خالص برگردان."
         )
-        models_to_try = _get_live_free_vision_models()[:3]
+        models_to_try = _get_live_free_vision_models()[:4]
         last_err = None
         for model_name in models_to_try:
+            print(f"☁️ [Cloud AI Engine] Sending to OpenRouter model: {model_name}...")
             payload = {
                 "model": model_name,
                 "messages": [{"role": "user", "content": user_content}],
                 "temperature": 0.0,
             }
-            response = cloud_client.post(CLOUD_API_URL, headers=headers, json=payload, timeout=35.0)
+            response = cloud_client.post(openrouter_url, headers=headers, json=payload, timeout=40.0)
             if response.status_code == 200 and "choices" in response.json():
                 content = response.json()["choices"][0]["message"].get("content", "")
                 if content and "{" in content:
+                    print(f"✅ Success with OpenRouter model: {model_name}")
                     return _clean_json_output(content)
             last_err = f"{response.status_code}: {response.text}"
+            print(f"⚠️ Model {model_name} response: {last_err}")
         raise RuntimeError(f"OpenRouter Error: {last_err}")
 
     # حالت لوکال (Ollama)
@@ -151,7 +175,6 @@ def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
     response = http_client.post(OLLAMA_URL, json=payload)
     response.raise_for_status()
     return _clean_json_output(response.json()["message"]["content"])
-
 def extract_invoice_from_image(image_bytes: bytes) -> ExtractedInvoice:
     print("👉 [1/3] Extracting Document 1 + Physical Authenticity...")
     prompt = """تصویر این سند فارسی را با دقت بخوان و اطلاعات جدول، مبالغ و وضعیت اصالت فیزیکی (وجود مهر و امضا) را دقیقا در قالب JSON زیر استخراج کن.
