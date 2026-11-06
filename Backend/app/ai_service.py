@@ -11,17 +11,46 @@ from .schemas import (
 )
 from .database import POLineItem
 
-# تنظیمات موتور لوکال (Ollama)
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/chat")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3.5:4b")
 
-# تنظیمات موتور ابری رایگان (OpenRouter Qwen-VL یا Google Gemini) برای سرور دمو
 CLOUD_API_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
 CLOUD_API_URL = os.getenv("CLOUD_API_URL", "https://openrouter.ai/api/v1/chat/completions")
-CLOUD_VISION_MODEL = os.getenv("CLOUD_VISION_MODEL", "qwen/qwen2.5-vl-72b-instruct:free")
 
 http_client = httpx.Client(trust_env=False, timeout=600.0)
 cloud_client = httpx.Client(timeout=120.0)
+
+_CACHED_VISION_MODELS: List[str] = []
+
+
+def _get_live_free_vision_models() -> List[str]:
+    """واکشی خودکار لیست مدل‌های بینایی (Vision) رایگان و فعال روز از خود OpenRouter"""
+    global _CACHED_VISION_MODELS
+    if _CACHED_VISION_MODELS:
+        return _CACHED_VISION_MODELS
+
+    discovered = []
+    try:
+        res = cloud_client.get("https://openrouter.ai/api/v1/models")
+        if res.status_code == 200:
+            data = res.json().get("data", [])
+            for m in data:
+                mid = m.get("id", "")
+                arch = m.get("architecture", {}) or {}
+                inputs = arch.get("input_modalities", []) or []
+                modality_str = str(arch.get("modality", ""))
+                if mid.endswith(":free") and ("image" in inputs or "image" in modality_str):
+                    discovered.append(mid)
+    except Exception as e:
+        print("⚠️ Could not fetch dynamic model list:", e)
+
+    # اولویت‌بندی مدل‌های قوی‌تر (Qwen / Gemma / Gemini / Mistral) + روتر عمومی openrouter/free
+    preferred = [m for m in discovered if any(k in m.lower() for k in ["qwen", "gemini", "gemma", "mistral", "llama"])]
+    others = [m for m in discovered if m not in preferred]
+    final_list = preferred + others + ["openrouter/free"]
+    print("✅ Active Free Vision Models discovered on OpenRouter:", final_list[:8])
+    _CACHED_VISION_MODELS = final_list[:8]
+    return _CACHED_VISION_MODELS
 
 
 def _encode_image(image_bytes: bytes) -> str:
@@ -29,7 +58,6 @@ def _encode_image(image_bytes: bytes) -> str:
 
 
 def _clean_json_output(raw_text: str) -> str:
-    """حذف تگ‌های احتمالی ```json از خروجی مدل‌های ابری"""
     cleaned = raw_text.strip()
     cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
     cleaned = re.sub(r"\s*```$", "", cleaned)
@@ -38,14 +66,6 @@ def _clean_json_output(raw_text: str) -> str:
     if start != -1 and end != -1 and end > start:
         return cleaned[start : end + 1]
     return cleaned
-
-
-FREE_VISION_MODELS = [
-    "qwen/qwen2.5-vl-72b-instruct:free",
-    "qwen/qwen2.5-vl-32b-instruct:free",
-    "google/gemma-3-27b-it:free",
-    "meta-llama/llama-3.2-11b-vision-instruct:free",
-]
 
 
 def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
@@ -63,25 +83,29 @@ def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
         else:
             user_content = prompt + "\nفقط و فقط خروجی JSON خالص برگردان."
 
+        models_to_try = _get_live_free_vision_models()
         last_err = None
-        for model_name in FREE_VISION_MODELS:
-            print(f"☁️ [Cloud AI Engine] Trying model: {model_name}...")
+
+        for model_name in models_to_try:
+            print(f"☁️ [Cloud AI Engine] Trying live model: {model_name}...")
             payload = {
                 "model": model_name,
                 "messages": [{"role": "user", "content": user_content}],
                 "temperature": 0.0,
             }
             response = cloud_client.post(CLOUD_API_URL, headers=headers, json=payload)
-            if response.status_code == 200 and "choices" in response.json():
-                content = response.json()["choices"][0]["message"]["content"]
-                return _clean_json_output(content)
-            else:
-                last_err = f"{response.status_code}: {response.text}"
-                print(f"⚠️ Model {model_name} busy/failed ({last_err}), trying next...")
+            if response.status_code == 200:
+                resp_json = response.json()
+                if "choices" in resp_json and len(resp_json["choices"]) > 0:
+                    content = resp_json["choices"][0]["message"].get("content", "")
+                    if content and "{" in content:
+                        print(f"✅ Success with model: {model_name}")
+                        return _clean_json_output(content)
+            last_err = f"{response.status_code}: {response.text}"
+            print(f"⚠️ Model {model_name} failed ({last_err}), trying next...")
 
         raise RuntimeError(f"All free vision models failed. Last error: {last_err}")
 
-    # حالت پیش‌فرض لوکال (Ollama)
     msg = {"role": "user", "content": prompt}
     if image_bytes:
         msg["images"] = [_encode_image(image_bytes)]
@@ -100,6 +124,7 @@ def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
         response.raise_for_status()
     content = response.json()["message"]["content"]
     return _clean_json_output(content)
+
 
 def extract_invoice_from_image(image_bytes: bytes) -> ExtractedInvoice:
     print("👉 [1/3] Extracting Document 1 + Physical Authenticity...")
@@ -179,7 +204,7 @@ def match_items_semantically(
 هر ردیف از «سند اول» را با «کالاهای مرجع در ERP» و «ردیف‌های سند انبار» مقایسه کن.
 
 قوانین بسیار مهم:
-1. اگر کالاها ماهیت یکسانی دارند و فقط نام تجاری یا نگارش متفاوت است (مثلا «ظرف پلاستیکی ۲۵۰ میلی‌لیتر» همان «بطری پت ۲۵۰ سی‌سی» است، «سرپوش لولایی» همان «درب بطری» است، و «جعبه مقوایی ۵ لایه» همان «کارتن ۵ لایه» است)، حتماً is_technical_match را true و confidence_score را بین 0.92 تا 0.98 بگذار!
+1. اگر کالاها ماهیت یکسانی دارند و فقط نام تجاری یا نگارش متفاوت است، حتماً is_technical_match را true و confidence_score را بین 0.92 تا 0.98 بگذار!
 2. فقط زمانی is_technical_match را false و confidence_score را 0.15 بگذار که ماهیت کالاها کاملاً بی‌ربط باشد.
 
 کالاهای مرجع در ERP:

@@ -669,7 +669,7 @@ export default function App() {
     setExtractingPoLoading(true);
     setFeedbackBanner({
       type: "info",
-      text: `در حال بارگذاری و استخراج جدول سفارش مرجع از فایل «${file.name}»...`,
+      text: `در حال بارگذاری و استخراج جدول سفارش مرجع از فایل «${file.name}» توسط هوش مصنوعی...`,
     });
 
     const formData = new FormData();
@@ -680,7 +680,10 @@ export default function App() {
         method: "POST",
         body: formData,
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`خطا در استخراج سفارش مرجع (${res.status}): ${errText}`);
+      }
       const createdPo = await res.json();
       setCloudPos((prev) => ({ ...prev, [createdPo.po_number]: createdPo }));
       if (!poList.some((p) => p.po_number === createdPo.po_number)) {
@@ -690,10 +693,13 @@ export default function App() {
       setPoData(createdPo);
       setFeedbackBanner({
         type: "success",
-        text: `پرونده مرجع ${createdPo.po_number} با موفقیت توسط هوش مصنوعی ساخته شد.`,
+        text: `پرونده مرجع «${createdPo.po_number}» با موفقیت از روی تصویر شما استخراج و ساخته شد.`,
       });
-    } catch {
-      handleOneClickExtractSamplePO();
+    } catch (err) {
+      setFeedbackBanner({
+        type: "error",
+        text: err.message || "خطا در ارتباط با سرور هوش مصنوعی.",
+      });
     } finally {
       setExtractingPoLoading(false);
     }
@@ -743,6 +749,10 @@ export default function App() {
     const file = e.target.files[0];
     if (!file) return;
     setLearningAccLoading(true);
+    setFeedbackBanner({
+      type: "info",
+      text: `در حال استخراج کدینگ حسابداری از فایل «${file.name}»...`,
+    });
 
     const formData = new FormData();
     formData.append("sample_image", file);
@@ -752,15 +762,21 @@ export default function App() {
         method: "POST",
         body: formData,
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`خطا در یادگیری الگوی حسابداری (${res.status}): ${errText}`);
+      }
       const learned = await res.json();
       setAccTemplate(learned);
       setFeedbackBanner({
         type: "success",
-        text: "الگوی سند حسابداری شرکت با موفقیت از روی تصویر نمونه یادگیری شد.",
+        text: "الگوی سند حسابداری شرکت با موفقیت از روی تصویر آپلودی شما یادگیری شد.",
       });
-    } catch {
-      handleOneClickLearnSampleAccounting();
+    } catch (err) {
+      setFeedbackBanner({
+        type: "error",
+        text: err.message || "خطا در ارتباط با سرور هوش مصنوعی.",
+      });
     } finally {
       setLearningAccLoading(false);
     }
