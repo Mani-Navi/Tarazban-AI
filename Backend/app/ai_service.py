@@ -1,3 +1,5 @@
+import os
+import re
 import base64
 import httpx
 from typing import List, Dict
@@ -9,33 +11,94 @@ from .schemas import (
 )
 from .database import POLineItem
 
-OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
-OLLAMA_MODEL = "qwen3.5:4b"
+# تنظیمات موتور لوکال (Ollama)
+OLLAMA_URL = os.getenv("OLLAMA_URL", "http://127.0.0.1:11434/api/chat")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen3.5:4b")
+
+# تنظیمات موتور ابری رایگان (OpenRouter Qwen-VL یا Google Gemini) برای سرور دمو
+CLOUD_API_KEY = os.getenv("OPENROUTER_API_KEY", "").strip()
+CLOUD_API_URL = os.getenv("CLOUD_API_URL", "https://openrouter.ai/api/v1/chat/completions")
+CLOUD_VISION_MODEL = os.getenv("CLOUD_VISION_MODEL", "qwen/qwen2.5-vl-72b-instruct:free")
 
 http_client = httpx.Client(trust_env=False, timeout=600.0)
+cloud_client = httpx.Client(timeout=120.0)
 
 
 def _encode_image(image_bytes: bytes) -> str:
     return base64.b64encode(image_bytes).decode("utf-8")
 
 
-def _call_ollama(payload: dict) -> str:
+def _clean_json_output(raw_text: str) -> str:
+    """حذف تگ‌های احتمالی ```json از خروجی مدل‌های ابری"""
+    cleaned = raw_text.strip()
+    cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned)
+    cleaned = re.sub(r"\s*```$", "", cleaned)
+    start = cleaned.find("{")
+    end = cleaned.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return cleaned[start : end + 1]
+    return cleaned
+
+
+def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
+    """انتخاب خودکار بین موتور ابری (روی سرور دمو) و موتور لوکال Ollama (روی سیستم شخصی)"""
+    if CLOUD_API_KEY:
+        print(f"☁️ [Cloud AI Engine] Processing with {CLOUD_VISION_MODEL}...")
+        headers = {
+            "Authorization": f"Bearer {CLOUD_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        if image_bytes:
+            b64_img = _encode_image(image_bytes)
+            user_content = [
+                {"type": "text", "text": prompt + "\nفقط و فقط خروجی JSON خالص برگردان."},
+                {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64_img}"}},
+            ]
+        else:
+            user_content = prompt + "\nفقط و فقط خروجی JSON خالص برگردان."
+
+        payload = {
+            "model": CLOUD_VISION_MODEL,
+            "messages": [{"role": "user", "content": user_content}],
+            "temperature": 0.0,
+        }
+        response = cloud_client.post(CLOUD_API_URL, headers=headers, json=payload)
+        if response.status_code != 200:
+            print(f"❌ CLOUD AI ERROR ({response.status_code}): {response.text}")
+            response.raise_for_status()
+        content = response.json()["choices"][0]["message"]["content"]
+        return _clean_json_output(content)
+
+    # حالت پیش‌فرض لوکال (Ollama)
+    msg = {"role": "user", "content": prompt}
+    if image_bytes:
+        msg["images"] = [_encode_image(image_bytes)]
+
+    payload = {
+        "model": OLLAMA_MODEL,
+        "messages": [msg],
+        "format": "json",
+        "stream": False,
+        "think": False,
+        "options": {"temperature": 0.0, "num_gpu": 0},
+    }
     response = http_client.post(OLLAMA_URL, json=payload)
     if response.status_code != 200:
         print(f"❌ OLLAMA ERROR ({response.status_code}): {response.text}")
         response.raise_for_status()
-    return response.json()["message"]["content"]
+    content = response.json()["message"]["content"]
+    return _clean_json_output(content)
 
 
 def extract_invoice_from_image(image_bytes: bytes) -> ExtractedInvoice:
-    print("👉 [1/3] Extracting Document 1 + Physical Authenticity (Stamp/Signature)...")
+    print("👉 [1/3] Extracting Document 1 + Physical Authenticity...")
     prompt = """تصویر این سند فارسی را با دقت بخوان و اطلاعات جدول، مبالغ و وضعیت اصالت فیزیکی (وجود مهر و امضا) را دقیقا در قالب JSON زیر استخراج کن.
 قوانین مهم:
 1. اگر سند فاقد قیمت است (مثل قبض انبار یا تقاضای خرید)، برای مبالغ عدد 0 بگذار.
 2. بررسی کن آیا در پایین یا بالای سند مهر رسمی شرکت (has_official_stamp) و امضای فروشنده/مسئول (has_valid_signature) وجود دارد یا خیر و در authenticity_note توضیح بده.
 {
   "invoice_number": "شماره فاکتور یا سند",
-  "po_number": "شماره سفارش مرجع مثلا PO-2026-101 یا 1365",
+  "po_number": "شماره سفارش مرجع مثلا PO-2026-101",
   "vendor_name": "نام شرکت فروشنده یا واحد متقاضی",
   "items": [
     {
@@ -53,21 +116,7 @@ def extract_invoice_from_image(image_bytes: bytes) -> ExtractedInvoice:
   "has_valid_signature": true,
   "authenticity_note": "مهر رسمی واحد فروش و امضای مجاز در ذیل صورتحساب احراز گردید."
 }"""
-    payload = {
-        "model": OLLAMA_MODEL,
-        "messages": [
-            {
-                "role": "user",
-                "content": prompt,
-                "images": [_encode_image(image_bytes)]
-            }
-        ],
-        "format": "json",
-        "stream": False,
-        "think": False,
-        "options": {"temperature": 0.0, "num_gpu": 0}
-    }
-    content = _call_ollama(payload)
+    content = _call_ai_engine(prompt, image_bytes)
     print("✅ [1/3] Document 1 extracted:", content)
     return ExtractedInvoice.model_validate_json(content)
 
@@ -77,7 +126,7 @@ def extract_grn_from_image(image_bytes: bytes) -> ExtractedGRN:
     prompt = """تصویر این قبض/سند انبار فارسی را با دقت بخوان و اطلاعات آن را به همراه بررسی وجود مهر، امضای انباردار و دست‌خط در قالب JSON زیر استخراج کن:
 {
   "grn_number": "شماره قبض انبار",
-  "po_number": "شماره سفارش مرجع مثلا PO-2026-101 یا 1210",
+  "po_number": "شماره سفارش مرجع مثلا PO-2026-101",
   "items": [
     {
       "row_number": 1,
@@ -91,21 +140,7 @@ def extract_grn_from_image(image_bytes: bytes) -> ExtractedGRN:
   "has_handwritten_notes": true,
   "authenticity_note": "امضای انباردار، رئیس انبار و توضیحات دست‌نویس/مهر انبار در سند مشاهده شد."
 }"""
-    payload = {
-        "model": OLLAMA_MODEL,
-        "messages": [
-            {
-                "role": "user",
-                "content": prompt,
-                "images": [_encode_image(image_bytes)]
-            }
-        ],
-        "format": "json",
-        "stream": False,
-        "think": False,
-        "options": {"temperature": 0.0, "num_gpu": 0}
-    }
-    content = _call_ollama(payload)
+    content = _call_ai_engine(prompt, image_bytes)
     print("✅ [2/3] Document 2 extracted:", content)
     return ExtractedGRN.model_validate_json(content)
 
@@ -134,7 +169,7 @@ def match_items_semantically(
 
 قوانین بسیار مهم:
 1. اگر کالاها ماهیت یکسانی دارند و فقط نام تجاری یا نگارش متفاوت است (مثلا «ظرف پلاستیکی ۲۵۰ میلی‌لیتر» همان «بطری پت ۲۵۰ سی‌سی» است، «سرپوش لولایی» همان «درب بطری» است، و «جعبه مقوایی ۵ لایه» همان «کارتن ۵ لایه» است)، حتماً is_technical_match را true و confidence_score را بین 0.92 تا 0.98 بگذار!
-2. فقط زمانی is_technical_match را false و confidence_score را 0.15 بگذار که ماهیت کالاها کاملاً بی‌ربط باشد (مثلا «بطری پلاستیکی» در برابر «الکتروموتور صنعتی»، یا «الکتروموتور اگزاست فن ۰.۲۵ کیلووات درخواست ۱۳۶۵» در برابر «پمپ دنده‌ای کراخت ۲.۲ کیلووات درخواست ۱۲۱۰»).
+2. فقط زمانی is_technical_match را false و confidence_score را 0.15 بگذار که ماهیت کالاها کاملاً بی‌ربط باشد.
 
 کالاهای مرجع در ERP:
 {erp_catalog_text}
@@ -160,18 +195,9 @@ def match_items_semantically(
     }}
   ]
 }}"""
-    payload = {
-        "model": OLLAMA_MODEL,
-        "messages": [{"role": "user", "content": prompt}],
-        "format": "json",
-        "stream": False,
-        "think": False,
-        "options": {"temperature": 0.0, "num_gpu": 0}
-    }
-    content = _call_ollama(payload)
+    content = _call_ai_engine(prompt, None)
     result = SemanticMatchResult.model_validate_json(content)
 
-    # لایه ۳: اعمال حافظه خودآموز کدینگ کالا (Self-Learning Vendor Alias Memory)
     inv_map = {i.row_number: i.raw_item_name.strip() for i in invoice.items}
     for m in result.matches:
         raw_name = inv_map.get(m.invoice_row_number, m.invoice_raw_name.strip())
@@ -194,11 +220,9 @@ def learn_accounting_template_from_image(
     po_number: str,
     company_name: str,
 ) -> AccountingTemplateSchema:
-    """لایه ۵: یادگیری الگوی سند حسابداری و کدینگ حساب‌های یک شرکت از روی تصویر نمونه سند حسابداری آن شرکت"""
     print("👉 [AI Accounting Learner] Extracting Company Accounting Pattern from sample image...")
     prompt = f"""تصویر این نمونه سند حسابداری یا جدول کدینگ حسابداری شرکت را با دقت بخوان.
-هدف ما یادگیری کدهای معین/تفصیلی و عناوین حساب‌های این شرکت برای صدور خودکار سند حسابداری خرید است.
-اگر برخی از این ۴ حساب در تصویر نمونه نبود، کد و عنوان استاندارد هم‌خانواده با ساختار کدینگ همین تصویر برایش تولید کن:
+هدف ما یادگیری کدهای معین/تفصیلی و عناوین حساب‌های این شرکت برای صدور خودکار سند حسابداری خرید است:
 1. حساب موجودی کالا / خرید مواد (inventory_acc_code و inventory_acc_title)
 2. حساب مالیات بر ارزش افزوده خرید (vat_acc_code و vat_acc_title)
 3. حساب پرداختنی تجاری / بستانکاران (payable_acc_code و payable_acc_title)
@@ -220,21 +244,7 @@ def learn_accounting_template_from_image(
   "discrepancy_acc_title": "عنوان حساب کسورات/برگشت از خرید",
   "learned_from_user_sample": true
 }}"""
-    payload = {
-        "model": OLLAMA_MODEL,
-        "messages": [
-            {
-                "role": "user",
-                "content": prompt,
-                "images": [_encode_image(image_bytes)]
-            }
-        ],
-        "format": "json",
-        "stream": False,
-        "think": False,
-        "options": {"temperature": 0.0, "num_gpu": 0}
-    }
-    content = _call_ollama(payload)
+    content = _call_ai_engine(prompt, image_bytes)
     print("✅ [AI Accounting Learner] Learned Template:", content)
     parsed = AccountingTemplateSchema.model_validate_json(content)
     parsed.po_number = po_number
