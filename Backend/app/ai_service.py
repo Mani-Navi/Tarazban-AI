@@ -70,46 +70,76 @@ def _clean_json_output(raw_text: str) -> str:
 
 def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
     if CLOUD_API_KEY:
-        headers = {
-            "Authorization": f"Bearer {CLOUD_API_KEY}",
-            "Content-Type": "application/json",
-        }
-        if image_bytes:
-            b64_img = _encode_image(image_bytes)
-            user_content = [
-                {"type": "text", "text": prompt + "\nفقط و فقط خروجی JSON خالص برگردان."},
+        b64_img = _encode_image(image_bytes) if image_bytes else None
+
+        # حالت ۱: اگر کلید Google Gemini (شروع با AIza) باشد — فوق‌العاده سریع (۲ ثانیه) و رایگان
+        if CLOUD_API_KEY.startswith("AIza"):
+            gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={CLOUD_API_KEY}"
+            parts = [{"text": prompt + "\nفقط خروجی JSON خالص برگردان."}]
+            if b64_img:
+                parts.append({"inline_data": {"mime_type": "image/png", "data": b64_img}})
+            payload = {
+                "contents": [{"parts": parts}],
+                "generationConfig": {"temperature": 0.0, "responseMimeType": "application/json"},
+            }
+            res = cloud_client.post(gemini_url, json=payload)
+            if res.status_code != 200:
+                raise RuntimeError(f"Gemini API Error ({res.status_code}): {res.text}")
+            text = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+            return _clean_json_output(text)
+
+        # حالت ۲: اگر کلید Groq (شروع با gsk_) باشد — فوق‌العاده سریع (۱.۵ ثانیه) و رایگان
+        if CLOUD_API_KEY.startswith("gsk_"):
+            headers = {"Authorization": f"Bearer {CLOUD_API_KEY}", "Content-Type": "application/json"}
+            user_content = (
+                [
+                    {"type": "text", "text": prompt + "\nفقط خروجی JSON خالص برگردان."},
+                    {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64_img}"}},
+                ]
+                if b64_img
+                else prompt + "\nفقط خروجی JSON خالص برگردان."
+            )
+            payload = {
+                "model": "meta-llama/llama-4-scout-17b-16e-instruct",
+                "messages": [{"role": "user", "content": user_content}],
+                "temperature": 0.0,
+                "response_format": {"type": "json_object"},
+            }
+            res = cloud_client.post("https://api.groq.com/openai/v1/chat/completions", headers=headers, json=payload)
+            if res.status_code != 200:
+                raise RuntimeError(f"Groq API Error ({res.status_code}): {res.text}")
+            return _clean_json_output(res.json()["choices"][0]["message"]["content"])
+
+        # حالت ۳: کلید OpenRouter (شروع با sk-or-)
+        headers = {"Authorization": f"Bearer {CLOUD_API_KEY}", "Content-Type": "application/json"}
+        user_content = (
+            [
+                {"type": "text", "text": prompt + "\nفقط خروجی JSON خالص برگردان."},
                 {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{b64_img}"}},
             ]
-        else:
-            user_content = prompt + "\nفقط و فقط خروجی JSON خالص برگردان."
-
-        models_to_try = _get_live_free_vision_models()
+            if b64_img
+            else prompt + "\nفقط خروجی JSON خالص برگردان."
+        )
+        models_to_try = _get_live_free_vision_models()[:3]
         last_err = None
-
         for model_name in models_to_try:
-            print(f"☁️ [Cloud AI Engine] Trying live model: {model_name}...")
             payload = {
                 "model": model_name,
                 "messages": [{"role": "user", "content": user_content}],
                 "temperature": 0.0,
             }
-            response = cloud_client.post(CLOUD_API_URL, headers=headers, json=payload)
-            if response.status_code == 200:
-                resp_json = response.json()
-                if "choices" in resp_json and len(resp_json["choices"]) > 0:
-                    content = resp_json["choices"][0]["message"].get("content", "")
-                    if content and "{" in content:
-                        print(f"✅ Success with model: {model_name}")
-                        return _clean_json_output(content)
+            response = cloud_client.post(CLOUD_API_URL, headers=headers, json=payload, timeout=35.0)
+            if response.status_code == 200 and "choices" in response.json():
+                content = response.json()["choices"][0]["message"].get("content", "")
+                if content and "{" in content:
+                    return _clean_json_output(content)
             last_err = f"{response.status_code}: {response.text}"
-            print(f"⚠️ Model {model_name} failed ({last_err}), trying next...")
+        raise RuntimeError(f"OpenRouter Error: {last_err}")
 
-        raise RuntimeError(f"All free vision models failed. Last error: {last_err}")
-
+    # حالت لوکال (Ollama)
     msg = {"role": "user", "content": prompt}
     if image_bytes:
         msg["images"] = [_encode_image(image_bytes)]
-
     payload = {
         "model": OLLAMA_MODEL,
         "messages": [msg],
@@ -119,12 +149,8 @@ def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
         "options": {"temperature": 0.0, "num_gpu": 0},
     }
     response = http_client.post(OLLAMA_URL, json=payload)
-    if response.status_code != 200:
-        print(f"❌ OLLAMA ERROR ({response.status_code}): {response.text}")
-        response.raise_for_status()
-    content = response.json()["message"]["content"]
-    return _clean_json_output(content)
-
+    response.raise_for_status()
+    return _clean_json_output(response.json()["message"]["content"])
 
 def extract_invoice_from_image(image_bytes: bytes) -> ExtractedInvoice:
     print("👉 [1/3] Extracting Document 1 + Physical Authenticity...")

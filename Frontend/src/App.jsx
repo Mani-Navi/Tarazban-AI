@@ -846,7 +846,7 @@ export default function App() {
       if (!invoiceFile) {
         setFeedbackBanner({
           type: "error",
-          text: "خطا: لطفاً ابتدا تصویر صورتحساب را انتخاب کنید یا یکی از دکمه‌های «بارگذاری نمونه» را بزنید.",
+          text: "خطا: لطفاً ابتدا تصویر صورتحساب را انتخاب کنید.",
         });
         return;
       }
@@ -854,30 +854,17 @@ export default function App() {
       if (!invoiceFile || !grnFile) {
         setFeedbackBanner({
           type: "error",
-          text: "خطا: لطفاً هر دو تصویر «صورتحساب» و «قبض انبار» را بارگذاری کنید.",
+          text: "خطا: لطفاً هر دو تصویر «صورتحساب» و «قبض انبار» را انتخاب کنید.",
         });
         return;
       }
     }
 
     setLoading(true);
-    setProcessProgress(15);
-    setProcessStepLabel("لایه ۱: ارسال تصاویر به سرور هوش مصنوعی و استخراج جداول...");
+    setProcessProgress(20);
+    setProcessStepLabel("در حال ارسال تصاویر به سرور هوش مصنوعی و استخراج جداول...");
 
-    const t1 = setTimeout(() => {
-      setProcessProgress(45);
-      setProcessStepLabel("لایه ۲: اجرای حل‌کننده معادله ماتریسی تراز ریاضی (Math-Guided OCR)...");
-    }, 2500);
-    const t2 = setTimeout(() => {
-      setProcessProgress(75);
-      setProcessStepLabel("لایه ۳ و ۴: تطبیق معنایی کدینگ، بررسی حافظه خودآموز و کنترل تکرار سند...");
-    }, 5500);
-    const t3 = setTimeout(() => {
-      setProcessProgress(90);
-      setProcessStepLabel("لایه ۵: صدور خودکار سند حسابداری دوبل منطبق با کدینگ شرکت...");
-    }, 8500);
-
-    // ۱. اگر کاربر فایل واقعی از کامپیوتر/موبایل خودش آپلود کرده است -> فقط و فقط از بک‌اند واقعی (Render/Local) بخوان!
+    // اگر کاربر خودش فایل عکس آپلود کرده است -> فقط و فقط از سرور هوش مصنوعی بخوان (هرگز دیتای آماده جایگزین نکن!)
     if (!invoiceFile.isPreset) {
       const formData = new FormData();
       formData.append("invoice_file", invoiceFile);
@@ -892,55 +879,40 @@ export default function App() {
 
       try {
         const res = await fetch(endpoint, { method: "POST", body: formData });
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
-
         if (!res.ok) {
           const errText = await res.text();
           throw new Error(`خطای سرور هوش مصنوعی (${res.status}): ${errText}`);
         }
-
         const data = await res.json();
         setProcessProgress(100);
         setReport(data);
         setSelectedItemIdx(0);
         setActiveResultTab("ITEMS");
-        setLoading(false);
         setFeedbackBanner({
           type: "success",
-          text: `ممیزی زنده ۵ لایه روی تصاویر بارگذاری‌شده با موفقیت انجام شد.`,
+          text: "ممیزی زنده هوش مصنوعی روی تصاویر آپلودی شما با موفقیت انجام شد.",
         });
-        return;
       } catch (err) {
-        clearTimeout(t1);
-        clearTimeout(t2);
-        clearTimeout(t3);
-        setLoading(false);
+        setReport(null);
         setFeedbackBanner({
           type: "error",
-          text: err.message || "خطا در ارتباط با سرور بک‌اند.",
+          text: err.message || "خطا در ارتباط با سرور هوش مصنوعی.",
         });
-        return;
+      } finally {
+        setLoading(false);
       }
+      return; // <--- این return جلوی جایگزین شدن دیتای آماده PO-2026-101 را ۱۰۰٪ می‌گیرد!
     }
 
-    // ۲. فقط اگر کاربر صراحتاً روی دکمه‌های «تست ۱ / تست ۲ / تست ۳ (اسناد نمونه)» کلیک کرده بود:
+    // فقط وقتی کاربر صراحتاً روی دکمه‌های «تست ۱ / تست ۲ / تست ۳» کلیک کرده باشد:
     setTimeout(() => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
       const generated = generatePresetAuditReport(activeSamplePreset || "STANDARD_101", selectedPoNumber);
       setProcessProgress(100);
       setReport(generated);
       setSelectedItemIdx(0);
       setActiveResultTab("ITEMS");
       setLoading(false);
-      setFeedbackBanner({
-        type: "success",
-        text: `فرآیند ممیزی ۵ لایه روی اسناد نمونه پرونده ${selectedPoNumber} انجام شد.`,
-      });
-    }, 1800);
+    }, 1200);
   };
 
   const handleApproveAlias = async (sku) => {
