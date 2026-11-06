@@ -1,0 +1,23 @@
+# Python & FastAPI
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+*.db
+*.sqlite3
+
+# Node & React (Vite)
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vercel/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log

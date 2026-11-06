@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>مجموعه کامل ۸ سند تستی سامانه ترازبان (تست ۱ تا ۵)</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: #cbd5e1;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 45px;
+            align-items: center;
+        }
+        .test-wrapper {
+            width: 850px;
+        }
+        .guide-banner {
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 10px 18px;
+            border-radius: 12px 12px 0 0;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+        }
+        .guide-banner span {
+            color: #38bdf8;
+        }
+        .doc-box {
+            background: #ffffff;
+            width: 850px;
+            box-sizing: border-box;
+            padding: 34px;
+            border: 2px solid #1e293b;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+            font-size: 13px;
+        }
+        th, td {
+            border: 1px solid #1e293b;
+            padding: 9px 10px;
+            text-align: center;
+        }
+        th {
+            background: #f1f5f9;
+            font-weight: bold;
+        }
+        .handwritten-blue {
+            color: #1d4ed8;
+            font-weight: bold;
+            font-style: italic;
+            transform: rotate(-1.5deg);
+            display: inline-block;
+        }
+        .strike-red {
+            text-decoration: line-through;
+            text-decoration-color: #dc2626;
+            text-decoration-thickness: 2.5px;
+            color: #94a3b8;
+            margin-left: 8px;
+        }
+        .stamp-blue {
+            border: 2.5px solid #1d4ed8;
+            color: #1d4ed8;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 12px;
+            transform: rotate(-5deg);
+        }
+        .stamp-green {
+            border: 2.5px solid #047857;
+            color: #047857;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: inline-block;
+            font-weight: bold;
+            font-size: 12px;
+            transform: rotate(4deg);
+        }
+    </style>
+</head>
+<body>
+
+<!-- ================================================================= -->
+<!-- سند ۱ (تست ۱): فاکتور فروشنده پاکشو (PO-2026-101) -->
+<!-- ================================================================= -->
+<div class="test-wrapper">
+    <div class="guide-banner">
+        <div>سند شماره ۱ (برای تست ۱ — پرونده PO-2026-101 پاکشو)</div>
+        <span>محل آپلود: باکس «تصویر صورتحساب»</span>
+    </div>
+    <div class="doc-box">
+        <div style="display:flex; justify-content:space-between; border-bottom:2px solid #000; padding-bottom:12px;">
+            <div>
+                <h2 style="margin:0; font-size:18px;">صورتحساب فروش کالا و خدمات</h2>
+                <p style="margin:4px 0 0; font-size:12px;">فروشنده: شرکت صنایع بسته‌بندی و پلاستیک پارس | خریدار: شرکت گروه صنعتی پاکشو</p>
+            </div>
+            <div style="font-size:12px; text-align:left;">
+                <div>شماره فاکتور: <strong>1405/8942</strong></div>
+                <div>تاریخ: ۱۴۰۵/۰۸/۱۲</div>
+                <div>عطف به سفارش خرید: <strong>PO-2026-101</strong></div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ردیف</th>
+                <th>شرح کالا / خدمات</th>
+                <th>واحد</th>
+                <th>تعداد / مقدار</th>
+                <th>مبلغ واحد (ریال)</th>
+                <th>مبلغ کل (ریال)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>ظرف پلاستیکی ۲۵۰ میلی‌لیتر بی‌رنگ دهانه ۲۸</td>
+                <td>عدد</td>
+                <td>1,000</td>
+                <td>50,000</td>
+                <td>50,000,000</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>سرپوش لولایی سفید صدفی سایز ۲۸</td>
+                <td>عدد</td>
+                <td>2,000</td>
+                <td>13,500</td>
+                <td>27,000,000</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>جعبه مقوایی پنج لایه چاپی متوسط</td>
+                <td>عدد</td>
+                <td>500</td>
+                <td>80,000</td>
+                <td>40,000,000</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="text-align:left; font-weight:bold;">جمع کل خالص (ریال):</td>
+                <td style="font-weight:bold;">117,000,000</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="text-align:left; font-weight:bold;">مالیات و عوارض ارزش افزوده (۱۰٪):</td>
+                <td style="font-weight:bold;">12,500,000</td>
+            </tr>
+            <tr style="background:#f8fafc;">
+                <td colspan="5" style="text-align:left; font-weight:bold;">مبلغ قابل پرداخت نهایی (ریال):</td>
+                <td style="font-weight:bold; font-size:14px;">129,500,000</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:22px;">
+            <div class="stamp-blue">واحد فروش و امور مالی - شرکت پلاستیک پارس</div>
+            <div style="font-size:12px;">امضای مجاز فروشنده: محمدی</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ================================================================= -->
+<!-- سند ۲ (تست ۱): قبض رسید انبار استاندارد پاکشو (PO-2026-101) -->
+<!-- ================================================================= -->
+<div class="test-wrapper">
+    <div class="guide-banner">
+        <div>سند شماره ۲ (برای تست ۱ — پرونده PO-2026-101 پاکشو)</div>
+        <span>محل آپلود: باکس «تصویر قبض انبار»</span>
+    </div>
+    <div class="doc-box">
+        <div style="display:flex; justify-content:space-between; border-bottom:2px solid #000; padding-bottom:12px;">
+            <div>
+                <h2 style="margin:0; font-size:18px;">قبض رسید انبار مرکزی — شرکت پاکشو</h2>
+                <p style="margin:4px 0 0; font-size:12px;">تحویل‌دهنده: شرکت صنایع بسته‌بندی و پلاستیک پارس</p>
+            </div>
+            <div style="font-size:12px; text-align:left;">
+                <div>شماره قبض انبار: <strong>GRN-405-991</strong></div>
+                <div>عطف به سفارش خرید: <strong>PO-2026-101</strong></div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ردیف</th>
+                <th>کد کالا</th>
+                <th>شرح کالا در انبار</th>
+                <th>واحد</th>
+                <th>تعداد تحویل شده سالم نهایی</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>PK-104</td>
+                <td>بطری پت ۲۵۰ سی‌سی شفاف</td>
+                <td>عدد</td>
+                <td style="font-weight:bold;">950</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>PK-208</td>
+                <td>درب فلیپ‌تاپ سفید صدفی</td>
+                <td>عدد</td>
+                <td style="font-weight:bold;">2,000</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>PK-315</td>
+                <td>کارتن ۵ لایه لمینتی چاپی</td>
+                <td>عدد</td>
+                <td style="font-weight:bold;">500</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top:14px; padding:10px; background:#f8fafc; border:1px solid #cbd5e1; font-size:12px;">
+            <strong>صورتجلسه و توضیحات انباردار:</strong> در ردیف ۱ تعداد ۵۰ عدد بطری به دلیل لهیدگی کارتن در حین حمل شکسته بود و به راننده مرجوع گردید؛ فقط ۹۵۰ عدد سالم وارد موجودی انبار شد.
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+            <div class="stamp-green">انبار مرکزی شرکت پاکشو - ثبت موجودی شد</div>
+            <div style="font-size:12px;">امضای انباردار: کریمی</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ================================================================= -->
+<!-- سند ۳ (تست ۲): نمونه سند حسابداری شرکت افق کوروش جهت یادگیری AI -->
+<!-- ================================================================= -->
+<div class="test-wrapper">
+    <div class="guide-banner">
+        <div>سند شماره ۳ (برای تست ۲ — یادگیری الگوی سند حسابداری شرکت جدید با AI)</div>
+        <span>محل آپلود: تب «الگوی سند» ⬅ دکمه «آپلود نمونه سند»</span>
+    </div>
+    <div class="doc-box">
+        <div style="display:flex; justify-content:space-between; border-bottom:2px solid #000; padding-bottom:10px;">
+            <div>
+                <h2 style="margin:0; font-size:17px;">شرکت فروشگاه‌های زنجیره‌ای افق کوروش (سهامی عام)</h2>
+                <p style="margin:4px 0 0; font-size:12px;">نمونه سند حسابداری استاندارد خرید کالا — سیستم مالی گلرنگ سیستم</p>
+            </div>
+            <div style="font-size:12px; text-align:left;">
+                <div>روش ثبت: GROSS_WITH_DEDUCTION</div>
+                <div>شماره سند نمونه: VCH-OK-1405</div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ردیف</th>
+                <th>کد معین حساب</th>
+                <th>عنوان رسمی حساب در کدینگ شرکت</th>
+                <th>بدهکار (ریال)</th>
+                <th>بستانکار (ریال)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td style="font-family:monospace; font-weight:bold;">10502010</td>
+                <td>موجودی کالای آماده فروش - مرکز توزیع مرکزی افق کوروش</td>
+                <td>100,000,000</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td style="font-family:monospace; font-weight:bold;">10804020</td>
+                <td>اعتبار مالیات و عوارض ارزش افزوده خریدهای فروشگاهی</td>
+                <td>10,000,000</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td style="font-family:monospace; font-weight:bold;">20101090</td>
+                <td>حساب‌های پرداختنی تجاری - تامین‌کنندگان کالاهای تندمصرف</td>
+                <td>0</td>
+                <td>105,000,000</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td style="font-family:monospace; font-weight:bold;">20905030</td>
+                <td>ذخیره کسورات، ضایعات حمل و اعلامیه بدهکار تامین‌کنندگان</td>
+                <td>0</td>
+                <td>5,000,000</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+<!-- ================================================================= -->
+<!-- سند ۴ (تست ۳): قبض انبار چالشی دارای خط‌خوردگی و دست‌خط خودکار آبی -->
+<!-- ================================================================= -->
+<div class="test-wrapper">
+    <div class="guide-banner">
+        <div>سند شماره ۴ (برای تست ۳ — چالش عدد چاپی خط‌خورده + دست‌خط انباردار در PO-2026-101)</div>
+        <span>محل آپلود: باکس «تصویر قبض انبار» (همراه با سند ۱)</span>
+    </div>
+    <div class="doc-box" style="background:#fffdf9;">
+        <div style="display:flex; justify-content:space-between; border-bottom:2px solid #000; padding-bottom:10px;">
+            <div>
+                <h2 style="margin:0; font-size:17px;">قبض رسید انبار مرکزی (نسخه فیزیکی خط‌خورده) — شرکت پاکشو</h2>
+                <p style="margin:4px 0 0; font-size:12px;">عطف به سفارش خرید شماره: <strong>PO-2026-101</strong></p>
+            </div>
+            <div style="font-size:12px; text-align:left;">
+                <div>شماره قبض انبار: <strong>GRN-405-995</strong></div>
+                <div>تاریخ تحویل: ۱۴۰۵/۰۸/۱۴</div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ردیف</th>
+                <th>کد کالا</th>
+                <th>شرح کالا در انبار</th>
+                <th>واحد</th>
+                <th>تعداد تحویل شده سالم نهایی در انبار</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>PK-104</td>
+                <td>بطری پت ۲۵۰ سی‌سی شفاف</td>
+                <td>عدد</td>
+                <td>
+                    <span class="strike-red">1,000</span>
+                    <span class="handwritten-blue">920 عدد سالم (80 عدد شکسته مرجوع شد)</span>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>PK-208</td>
+                <td>درب فلیپ‌تاپ سفید صدفی</td>
+                <td>عدد</td>
+                <td>2,000</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>PK-315</td>
+                <td>کارتن ۵ لایه لمینتی چاپی</td>
+                <td>عدد</td>
+                <td>
+                    <span class="strike-red">500</span>
+                    <span class="handwritten-blue">480 عدد سالم (20 کارتن خیس‌شده برگشت خورد)</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top:14px; padding:12px; border:1px dashed #1d4ed8; border-radius:8px;" class="handwritten-blue">
+            دست‌خط انباردار: در ردیف ۱ تعداد ۸۰ بطری شکسته بود (۹۲۰ عدد تحویل شد) و در ردیف ۳ نیز ۲۰ کارتن به علت خیس‌شدگی در باران تحویل گرفته نشد (۴۸۰ کارتن سالم تحویل شد).
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+            <div class="stamp-blue">انبار مرکزی شرکت پاکشو - بررسی فیزیکی شد</div>
+            <div class="handwritten-blue">امضای انباردار: حسینی</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ================================================================= -->
+<!-- سند ۵ (تست ۴): قبض انبار مرتبط برای پرونده پترو ایرانیان کرخه (PR-1365) -->
+<!-- ================================================================= -->
+<div class="test-wrapper">
+    <div class="guide-banner">
+        <div>سند شماره ۵ (برای تست ۴ — قبض انبار مرتبط با الکتروموتور PR-1365 پترو ایرانیان کرخه)</div>
+        <span>محل آپلود: باکس «تصویر قبض انبار» روی پرونده PR-1365</span>
+    </div>
+    <div class="doc-box">
+        <div style="display:flex; justify-content:space-between; border-bottom:2px solid #000; padding-bottom:10px;">
+            <div>
+                <h2 style="margin:0; font-size:17px;">شرکت پترو ایرانیان کرخه — سند تعدادی رسید انبار</h2>
+                <p style="margin:4px 0 0; font-size:12px;">انبار کالا (سایت اهواز) — فاز دوم طرح توسعه میدان نفتی یاران</p>
+            </div>
+            <div style="font-size:12px; text-align:left;">
+                <div>شماره سند انبار: <strong>GRN-YARAN-365</strong></div>
+                <div>عطف به تقاضای خرید: <strong>PR-1365</strong></div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ردیف</th>
+                <th>کد کالا / درخواست</th>
+                <th>شرح کامل فنی کالا در انبار</th>
+                <th>واحد</th>
+                <th>تعداد تحویل شده</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>REQ-1365-ELC</td>
+                <td>الکتروموتور ضدانفجار اگزاست فن توان 0.25 کیلووات دور 1400 تیپ 71 ساختمان کنترل</td>
+                <td>عدد</td>
+                <td style="font-weight:bold;">1</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top:14px; padding:10px; background:#f8fafc; border:1px solid #cbd5e1; font-size:12px;">
+            <strong>توضیحات فنی انبار و بازرسی کالا:</strong> تجهیز برقی مطابق درخواست خرید شماره ۱۳۶۵ (ثبت سیستم ۳۴۳) واحد تعمیرات برق پس از تست سالم تحویل انبار سایت اهواز گردید.
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+            <div class="stamp-blue">انبار مرکزی میدان نفتی یاران - پترو ایرانیان کرخه</div>
+            <div style="font-size:12px;">امضای رئیس انبار: احمدی</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ================================================================= -->
+<!-- سند ۶ (تست ۵ - گام ۱): برگه سفارش خرید جدید PO-2026-500 جهت ساخت خودکار مرجع با AI -->
+<!-- ================================================================= -->
+<div class="test-wrapper">
+    <div class="guide-banner">
+        <div>سند شماره ۶ (برای تست ۵ — گام ۱: ساخت خودکار جدول مرجع ERP از روی عکس برگه سفارش!)</div>
+        <span>محل آپلود: تب «مرجع (ERP)» ⬅ دکمه آبی «ساخت خودکار مرجع از تصویر برگه سفارش»</span>
+    </div>
+    <div class="doc-box">
+        <div style="display:flex; justify-content:space-between; border-bottom:2px solid #000; padding-bottom:10px;">
+            <div>
+                <h2 style="margin:0; font-size:17px;">برگه سفارش خرید رسمی کالا (Purchase Order)</h2>
+                <p style="margin:4px 0 0; font-size:12px;">خریدار: شرکت پخش سراسری گلرنگ | تامین‌کننده: شرکت صنایع غذایی بهروزان</p>
+            </div>
+            <div style="font-size:12px; text-align:left;">
+                <div>شماره سفارش خرید: <strong>PO-2026-500</strong></div>
+                <div>تاریخ سفارش: ۱۴۰۵/۰۸/۱۵</div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ردیف</th>
+                <th>شرح رسمی کالا در سفارش خرید</th>
+                <th>تعداد سفارش</th>
+                <th>مبلغ واحد توافقی (ریال)</th>
+                <th>مبلغ کل (ریال)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>رب گوجه‌فرنگی قوطی ۸۰۰ گرمی درجه یک با درب آسان‌بازشو</td>
+                <td>1,000</td>
+                <td>60,000</td>
+                <td>60,000,000</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>روغن مایع آفتابگردان پت ۹۰۰ گرمی مخصوص پخت‌وپز</td>
+                <td>500</td>
+                <td>80,000</td>
+                <td>40,000,000</td>
+            </tr>
+            </tbody>
+        </table>
+        <div style="margin-top:12px; font-size:12px; text-align:left;">
+            جمع خالص سفارش: 100,000,000 ریال | مالیات ارزش افزوده (۱۰٪): 10,000,000 ریال | جمع کل: 110,000,000 ریال
+        </div>
+    </div>
+</div>
+
+
+<!-- ================================================================= -->
+<!-- سند ۷ (تست ۵ - گام ۲): فاکتور فروشنده برای سفارش جدید PO-2026-500 -->
+<!-- ================================================================= -->
+<div class="test-wrapper">
+    <div class="guide-banner">
+        <div>سند شماره ۷ (برای تست ۵ — گام ۲: فاکتور فروشنده مربوط به سفارش جدید PO-2026-500)</div>
+        <span>محل آپلود: باکس «تصویر صورتحساب» (روی پرونده PO-2026-500)</span>
+    </div>
+    <div class="doc-box">
+        <div style="display:flex; justify-content:space-between; border-bottom:2px solid #000; padding-bottom:10px;">
+            <div>
+                <h2 style="margin:0; font-size:17px;">صورتحساب فروش کالا — شرکت صنایع غذایی بهروزان</h2>
+                <p style="margin:4px 0 0; font-size:12px;">خریدار: شرکت پخش سراسری گلرنگ</p>
+            </div>
+            <div style="font-size:12px; text-align:left;">
+                <div>شماره فاکتور: <strong>INV-500-99</strong></div>
+                <div>عطف به سفارش خرید: <strong>PO-2026-500</strong></div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ردیف</th>
+                <th>شرح کالا در فاکتور فروشنده</th>
+                <th>تعداد</th>
+                <th>مبلغ واحد (ریال)</th>
+                <th>مبلغ کل (ریال)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>کنسرو رب گوجه ممتاز قوطی فلزی ۸۰۰ گرم کلیددار</td>
+                <td>1,000</td>
+                <td>65,000</td>
+                <td>65,000,000</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>روغن آفتابگردان خوراکی بطری ۹۰۰ سی‌سی</td>
+                <td>500</td>
+                <td>80,000</td>
+                <td>40,000,000</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:left; font-weight:bold;">جمع خالص فاکتور (ریال):</td>
+                <td style="font-weight:bold;">105,000,000</td>
+            </tr>
+            <tr>
+                <td colspan="4" style="text-align:left; font-weight:bold;">مالیات و عوارض ارزش افزوده (۱۰٪):</td>
+                <td style="font-weight:bold;">11,200,000</td>
+            </tr>
+            <tr style="background:#f8fafc;">
+                <td colspan="4" style="text-align:left; font-weight:bold;">مبلغ قابل پرداخت نهایی (ریال):</td>
+                <td style="font-weight:bold;">116,200,000</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+            <div class="stamp-blue">امور مالی شرکت صنایع غذایی بهروزان</div>
+            <div style="font-size:12px;">امضای مدیر فروش: رضایی</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ================================================================= -->
+<!-- سند ۸ (تست ۵ - گام ۳): قبض رسید انبار برای سفارش جدید PO-2026-500 -->
+<!-- ================================================================= -->
+<div class="test-wrapper">
+    <div class="guide-banner">
+        <div>سند شماره ۸ (برای تست ۵ — گام ۳: قبض رسید انبار مربوط به سفارش جدید PO-2026-500)</div>
+        <span>محل آپلود: باکس «تصویر قبض انبار» (روی پرونده PO-2026-500)</span>
+    </div>
+    <div class="doc-box">
+        <div style="display:flex; justify-content:space-between; border-bottom:2px solid #000; padding-bottom:10px;">
+            <div>
+                <h2 style="margin:0; font-size:17px;">قبض رسید انبار مرکز پخش — شرکت پخش سراسری گلرنگ</h2>
+                <p style="margin:4px 0 0; font-size:12px;">تامین‌کننده: شرکت صنایع غذایی بهروزان</p>
+            </div>
+            <div style="font-size:12px; text-align:left;">
+                <div>شماره قبض: <strong>GRN-500-12</strong></div>
+                <div>عطف به سفارش: <strong>PO-2026-500</strong></div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ردیف</th>
+                <th>شرح کالا در رسید انبار</th>
+                <th>واحد</th>
+                <th>تعداد تحویل شده سالم در انبار</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>1</td>
+                <td>رب گوجه ۸۰۰ گرمی آسان‌بازشو</td>
+                <td>قوطی</td>
+                <td style="font-weight:bold;">960</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>روغن مایع آفتابگردان ۹۰۰ گرمی</td>
+                <td>بطری</td>
+                <td style="font-weight:bold;">500</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div style="margin-top:14px; padding:10px; background:#f8fafc; border:1px solid #cbd5e1; font-size:12px;">
+            <strong>صورتجلسه انبار پخش گلرنگ:</strong> در ردیف ۱ تعداد ۴۰ قوطی رب گوجه‌فرنگی به علت فرورفتگی قوطی و نشتی در حین حمل تحویل گرفته نشد و فقط ۹۶۰ قوطی سالم وارد انبار گردید.
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+            <div class="stamp-green">انبار مرکزی پخش سراسری گلرنگ - تایید رسید</div>
+            <div style="font-size:12px;">امضای سرپرست انبار: نادری</div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
