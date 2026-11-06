@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
+const rawEnvUrl = (
+    import.meta.env.VITE_API_BASE_URL ||
+    (window.location.hostname === "localhost"
+        ? "http://localhost:8000/api"
+        : "https://tarazban-ai.onrender.com/api")
+).replace(/\/+$/, "");
+
+const API_BASE = rawEnvUrl.endsWith("/api") ? rawEnvUrl : `${rawEnvUrl}/api`;
 const formatNumber = (num) => {
   if (num === undefined || num === null) return "۰";
   return Number(num).toLocaleString("fa-IR");
@@ -831,7 +838,7 @@ export default function App() {
       if (!invoiceFile || !grnFile) {
         setFeedbackBanner({
           type: "error",
-          text: "خطا: لطفاً هر دو تصویر «صورتحساب» و «قبض انبار» را بارگذاری کنید (یا از دکمه‌های نمونه یک‌کلیکی بالای باکس استفاده نمایید).",
+          text: "خطا: لطفاً هر دو تصویر «صورتحساب» و «قبض انبار» را بارگذاری کنید.",
         });
         return;
       }
@@ -839,26 +846,28 @@ export default function App() {
 
     setLoading(true);
     setProcessProgress(15);
-    setProcessStepLabel("لایه ۱: استخراج جداول، دست‌خط و احراز اصالت مهر و امضای اسناد...");
+    setProcessStepLabel("لایه ۱: ارسال تصاویر به سرور هوش مصنوعی و استخراج جداول...");
 
     const t1 = setTimeout(() => {
       setProcessProgress(45);
       setProcessStepLabel("لایه ۲: اجرای حل‌کننده معادله ماتریسی تراز ریاضی (Math-Guided OCR)...");
-    }, 500);
+    }, 2500);
     const t2 = setTimeout(() => {
       setProcessProgress(75);
       setProcessStepLabel("لایه ۳ و ۴: تطبیق معنایی کدینگ، بررسی حافظه خودآموز و کنترل تکرار سند...");
-    }, 1000);
+    }, 5500);
     const t3 = setTimeout(() => {
-      setProcessProgress(92);
+      setProcessProgress(90);
       setProcessStepLabel("لایه ۵: صدور خودکار سند حسابداری دوبل منطبق با کدینگ شرکت...");
-    }, 1450);
+    }, 8500);
 
-    // اگر فایل واقعی از سیستم آپلود شده و سرور لوکال روشن است
-    if (!invoiceFile.isPreset && !grnFile?.isPreset) {
+    // ۱. اگر کاربر فایل واقعی از کامپیوتر/موبایل خودش آپلود کرده است -> فقط و فقط از بک‌اند واقعی (Render/Local) بخوان!
+    if (!invoiceFile.isPreset) {
       const formData = new FormData();
       formData.append("invoice_file", invoiceFile);
-      if (grnFile) formData.append("grn_file", grnFile);
+      if (grnFile && !grnFile.isPreset) {
+        formData.append("grn_file", grnFile);
+      }
 
       const endpoint =
           selectedPoNumber === "ADHOC_NEW"
@@ -867,27 +876,44 @@ export default function App() {
 
       try {
         const res = await fetch(endpoint, { method: "POST", body: formData });
-        if (res.ok) {
-          const data = await res.json();
-          clearTimeout(t1);
-          clearTimeout(t2);
-          clearTimeout(t3);
-          setProcessProgress(100);
-          setReport(data);
-          setSelectedItemIdx(0);
-          setActiveResultTab("ITEMS");
-          setLoading(false);
-          setFeedbackBanner({
-            type: "success",
-            text: `ممیزی ۵ لایه پرونده ${selectedPoNumber} با موفقیت کامل شد.`,
-          });
-          return;
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`خطای سرور هوش مصنوعی (${res.status}): ${errText}`);
         }
-      } catch {}
+
+        const data = await res.json();
+        setProcessProgress(100);
+        setReport(data);
+        setSelectedItemIdx(0);
+        setActiveResultTab("ITEMS");
+        setLoading(false);
+        setFeedbackBanner({
+          type: "success",
+          text: `ممیزی زنده ۵ لایه روی تصاویر بارگذاری‌شده با موفقیت انجام شد.`,
+        });
+        return;
+      } catch (err) {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+        setLoading(false);
+        setFeedbackBanner({
+          type: "error",
+          text: err.message || "خطا در ارتباط با سرور بک‌اند.",
+        });
+        return;
+      }
     }
 
-    // اجرای هیبریدی ابری (ویژه Vercel و دکمه‌های نمونه یک‌کلیکی داوران)
+    // ۲. فقط اگر کاربر صراحتاً روی دکمه‌های «تست ۱ / تست ۲ / تست ۳ (اسناد نمونه)» کلیک کرده بود:
     setTimeout(() => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
       const generated = generatePresetAuditReport(activeSamplePreset || "STANDARD_101", selectedPoNumber);
       setProcessProgress(100);
       setReport(generated);
@@ -896,7 +922,7 @@ export default function App() {
       setLoading(false);
       setFeedbackBanner({
         type: "success",
-        text: `فرآیند ممیزی ۵ لایه و صدور خودکار سند حسابداری پرونده ${selectedPoNumber} با موفقیت انجام شد.`,
+        text: `فرآیند ممیزی ۵ لایه روی اسناد نمونه پرونده ${selectedPoNumber} انجام شد.`,
       });
     }, 1800);
   };

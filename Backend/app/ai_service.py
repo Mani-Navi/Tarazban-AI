@@ -40,10 +40,16 @@ def _clean_json_output(raw_text: str) -> str:
     return cleaned
 
 
+FREE_VISION_MODELS = [
+    "qwen/qwen2.5-vl-72b-instruct:free",
+    "qwen/qwen2.5-vl-32b-instruct:free",
+    "google/gemma-3-27b-it:free",
+    "meta-llama/llama-3.2-11b-vision-instruct:free",
+]
+
+
 def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
-    """انتخاب خودکار بین موتور ابری (روی سرور دمو) و موتور لوکال Ollama (روی سیستم شخصی)"""
     if CLOUD_API_KEY:
-        print(f"☁️ [Cloud AI Engine] Processing with {CLOUD_VISION_MODEL}...")
         headers = {
             "Authorization": f"Bearer {CLOUD_API_KEY}",
             "Content-Type": "application/json",
@@ -57,17 +63,23 @@ def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
         else:
             user_content = prompt + "\nفقط و فقط خروجی JSON خالص برگردان."
 
-        payload = {
-            "model": CLOUD_VISION_MODEL,
-            "messages": [{"role": "user", "content": user_content}],
-            "temperature": 0.0,
-        }
-        response = cloud_client.post(CLOUD_API_URL, headers=headers, json=payload)
-        if response.status_code != 200:
-            print(f"❌ CLOUD AI ERROR ({response.status_code}): {response.text}")
-            response.raise_for_status()
-        content = response.json()["choices"][0]["message"]["content"]
-        return _clean_json_output(content)
+        last_err = None
+        for model_name in FREE_VISION_MODELS:
+            print(f"☁️ [Cloud AI Engine] Trying model: {model_name}...")
+            payload = {
+                "model": model_name,
+                "messages": [{"role": "user", "content": user_content}],
+                "temperature": 0.0,
+            }
+            response = cloud_client.post(CLOUD_API_URL, headers=headers, json=payload)
+            if response.status_code == 200 and "choices" in response.json():
+                content = response.json()["choices"][0]["message"]["content"]
+                return _clean_json_output(content)
+            else:
+                last_err = f"{response.status_code}: {response.text}"
+                print(f"⚠️ Model {model_name} busy/failed ({last_err}), trying next...")
+
+        raise RuntimeError(f"All free vision models failed. Last error: {last_err}")
 
     # حالت پیش‌فرض لوکال (Ollama)
     msg = {"role": "user", "content": prompt}
@@ -88,7 +100,6 @@ def _call_ai_engine(prompt: str, image_bytes: bytes = None) -> str:
         response.raise_for_status()
     content = response.json()["message"]["content"]
     return _clean_json_output(content)
-
 
 def extract_invoice_from_image(image_bytes: bytes) -> ExtractedInvoice:
     print("👉 [1/3] Extracting Document 1 + Physical Authenticity...")
