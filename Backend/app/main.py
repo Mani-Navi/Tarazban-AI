@@ -42,6 +42,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.middleware("http")
+async def auto_fix_api_prefix(request, call_next):
+    """اصلاح خودکار مسیرهای //po به /api/po برای سازگاری کامل با Vercel"""
+    path = request.scope["path"]
+    while "//" in path:
+        path = path.replace("//", "/")
+    if path != "/" and not path.startswith("/api/") and not path.startswith("/docs") and not path.startswith("/openapi"):
+        path = f"/api{path}"
+    request.scope["path"] = path
+    return await call_next(request)
+
+
+@app.get("/")
+@app.head("/")
+def root_health_check():
+    return {"status": "TarazBan AI Backend is Live"}
 
 @app.on_event("startup")
 def on_startup():
