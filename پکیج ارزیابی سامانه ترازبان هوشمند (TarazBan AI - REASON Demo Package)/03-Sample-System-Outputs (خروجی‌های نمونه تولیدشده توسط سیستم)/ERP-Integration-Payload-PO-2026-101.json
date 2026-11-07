@@ -1,0 +1,174 @@
+{
+  "session_id": 1,
+  "po_number": "PO-2026-101",
+  "buyer_company": "شرکت گروه صنعتی پاکشو",
+  "vendor_name": "شرکت صنایع بسته‌بندی و پلاستیک پارس",
+  "audit_mode": "THREE_WAY_ERP",
+  "documents_swapped_auto_fixed": false,
+  "document_mismatch_warning": null,
+  "overall_status": "REJECTED_DISCREPANCY",
+  "authenticity_report": {
+    "invoice_has_stamp": true,
+    "invoice_has_signature": false,
+    "invoice_auth_note": "مهر رسمی شرکت در پایین سمت راست سند وجود دارد. امضای دستی قابل مشاهده نیست، فقط نام مجاز 'محمدی' در بخش امضاء‌های مجاز فاکتور درج شده است.",
+    "grn_has_stamp": true,
+    "grn_has_signature": true,
+    "grn_has_handwriting": false,
+    "grn_auth_note": "مهر انبار (کادر سبز پایین راست) و فیلد امضای انباردار (پایین چپ) در سند مشاهده شد."
+  },
+  "fraud_and_risk": {
+    "is_duplicate_invoice": false,
+    "submission_count": 1,
+    "previous_session_id": null,
+    "duplicate_warning_message": null,
+    "vendor_total_audits": 1,
+    "vendor_discrepancy_count": 1,
+    "vendor_risk_level": "MEDIUM"
+  },
+  "line_items": [
+    {
+      "sku": "PK-104",
+      "erp_item_name": "بطری پت ۲۵۰ سی‌سی شفاف (پریفرم ۲۸)",
+      "vendor_item_name": "طلا بالاستیک ۲۰٪ مایلتیل بریزک دانه ۲۴",
+      "grn_item_name": "برلی پیت ۲۵۰متری سنس شفاف",
+      "po_quantity": 1000,
+      "invoice_quantity": 1000,
+      "grn_received_quantity": 950,
+      "grn_notes": "",
+      "po_unit_price": 50000,
+      "invoice_unit_price": 50000,
+      "quantity_match": false,
+      "price_match": true,
+      "technical_match": false,
+      "semantic_confidence": 0.15,
+      "semantic_reasoning": "کالا در ردیف ۱ سند اول نوع مواد لولچی/طلا با دانه ۲۴ است که هیچ ارتباط فنی با بطری پت ۲۵۰ سی سی (PK-۱۰۴) یا ردیف ۱ سند انبار (بطری پت شفاف) ندارد. ماهیت کالاها کاملاً متفاوت و بی‌ربط است.",
+      "human_approved": false,
+      "learned_from_memory": false,
+      "math_ocr_correction_note": null,
+      "status": "RED",
+      "discrepancy_messages": [
+        "عدم انطباق ماهوی و فنی اسناد: کالای مندرج در اسناد بارگذاری‌شده («طلا بالاستیک ۲۰٪ مایلتیل بریزک دانه ۲۴» / «برلی پیت ۲۵۰متری سنس شفاف») با کالای پرونده مرجع («بطری پت ۲۵۰ سی‌سی شفاف (پریفرم ۲۸)») فاقد تطابق فنی و کدینگ است.",
+        "گزارش کارشناسی تطبیق فنی: کالا در ردیف ۱ سند اول نوع مواد لولچی/طلا با دانه ۲۴ است که هیچ ارتباط فنی با بطری پت ۲۵۰ سی سی (PK-۱۰۴) یا ردیف ۱ سند انبار (بطری پت شفاف) ندارد. ماهیت کالاها کاملاً متفاوت و بی‌ربط است."
+      ],
+      "financial_impact_rials": 50000000
+    },
+    {
+      "sku": "PK-208",
+      "erp_item_name": "درب بطری دهانه ۲۸ استاندارد",
+      "vendor_item_name": "سیر لوکس لولید سید سید سای ۲۴",
+      "grn_item_name": "درب قفلایب سبد صدفی",
+      "po_quantity": 2000,
+      "invoice_quantity": 2000,
+      "grn_received_quantity": 2000,
+      "grn_notes": "",
+      "po_unit_price": 12000,
+      "invoice_unit_price": 13500,
+      "quantity_match": true,
+      "price_match": true,
+      "technical_match": false,
+      "semantic_confidence": 0.15,
+      "semantic_reasoning": "کالا در ردیف ۲ سند اول نوع سیر/تجهیزات لوکس است و با درب بطری دهانه ۲۸ استاندارد (PK-۲۰۸) یا ردیف ۲ سند انبار (درب قفلایب سبد صدفی) تطابق فنی ندارد. ماهیت کالاها کاملاً متفاوت است.",
+      "human_approved": false,
+      "learned_from_memory": false,
+      "math_ocr_correction_note": null,
+      "status": "RED",
+      "discrepancy_messages": [
+        "عدم انطباق ماهوی و فنی اسناد: کالای مندرج در اسناد بارگذاری‌شده («سیر لوکس لولید سید سید سای ۲۴» / «درب قفلایب سبد صدفی») با کالای پرونده مرجع («درب بطری دهانه ۲۸ استاندارد») فاقد تطابق فنی و کدینگ است.",
+        "گزارش کارشناسی تطبیق فنی: کالا در ردیف ۲ سند اول نوع سیر/تجهیزات لوکس است و با درب بطری دهانه ۲۸ استاندارد (PK-۲۰۸) یا ردیف ۲ سند انبار (درب قفلایب سبد صدفی) تطابق فنی ندارد. ماهیت کالاها کاملاً متفاوت است."
+      ],
+      "financial_impact_rials": 27000000
+    },
+    {
+      "sku": "PK-315",
+      "erp_item_name": "کارتن ۵ لایه چاپی بسته‌بندی",
+      "vendor_item_name": "جعبه مغناطیس برای لidge جارى مغناطيسى",
+      "grn_item_name": "کارز ۵ لیتر لیموتین چای",
+      "po_quantity": 500,
+      "invoice_quantity": 500,
+      "grn_received_quantity": 500,
+      "grn_notes": "",
+      "po_unit_price": 80000,
+      "invoice_unit_price": 80000,
+      "quantity_match": true,
+      "price_match": true,
+      "technical_match": false,
+      "semantic_confidence": 0.15,
+      "semantic_reasoning": "کالا در ردیف ۳ سند اول جعبه مغناطیسی برای جارى مغناطيسى است، در حالی که کالا در ERP کارتن ۵ لایه چاپی بسته‌بندی (PK-۳۱۵) و در سند انبار کارز ۵ لیتر لیموتین چای است. هرچند هر دو نوع بسته‌بندی هستند، اما تفاوت‌های ساختاری و فنی قابل توجهی وجود دارد و تنها تفاوت نام تجاری یا نگارش نیست؛ بنابراین تطابق فنی تایید نمی‌شود.",
+      "human_approved": false,
+      "learned_from_memory": false,
+      "math_ocr_correction_note": null,
+      "status": "RED",
+      "discrepancy_messages": [
+        "عدم انطباق ماهوی و فنی اسناد: کالای مندرج در اسناد بارگذاری‌شده («جعبه مغناطیس برای لidge جارى مغناطيسى» / «کارز ۵ لیتر لیموتین چای») با کالای پرونده مرجع («کارتن ۵ لایه چاپی بسته‌بندی») فاقد تطابق فنی و کدینگ است.",
+        "گزارش کارشناسی تطبیق فنی: کالا در ردیف ۳ سند اول جعبه مغناطیسی برای جارى مغناطيسى است، در حالی که کالا در ERP کارتن ۵ لایه چاپی بسته‌بندی (PK-۳۱۵) و در سند انبار کارز ۵ لیتر لیموتین چای است. هرچند هر دو نوع بسته‌بندی هستند، اما تفاوت‌های ساختاری و فنی قابل توجهی وجود دارد و تنها تفاوت نام تجاری یا نگارش نیست؛ بنابراین تطابق فنی تایید نمی‌شود."
+      ],
+      "financial_impact_rials": 40000000
+    }
+  ],
+  "financial_summary": {
+    "invoice_claimed_subtotal": 117000000,
+    "calculated_invoice_subtotal": 117000000,
+    "invoice_claimed_vat": 12500000,
+    "expected_invoice_vat": 11700000,
+    "vat_calculation_error": 800000,
+    "invoice_claimed_grand_total": 129500000,
+    "true_payable_subtotal": 0,
+    "true_payable_vat": 0,
+    "true_payable_grand_total": 0,
+    "total_prevented_loss_rials": 129500000,
+    "has_tax_discrepancy": true,
+    "tax_discrepancy_message": "مغایرت محاسباتی مالیات بر ارزش افزوده (نرخ قانونی ۱۰٪): بر مبنای جمع خالص صورتحساب (117,000,000 ریال)، مالیات و عوارض متعلقه معادل 11,700,000 ریال محاسبه می‌گردد؛ لیکن تامین‌کننده مبلغ 12,500,000 ریال در صورتحساب درج نموده است (800,000 ریال اختلاف مالیاتی)."
+  },
+  "accounting_voucher": {
+    "template_title": "کدینگ استاندارد حسابداری صنعتی پاکشو (۶ رقمی)",
+    "voucher_method": "GROSS_WITH_DEDUCTION",
+    "learned_from_user_sample": false,
+    "voucher_date": "1405/08/15",
+    "voucher_description": "سند اتوماتیک خرید و ممیزی سه‌جانبه پرونده PO-2026-101 - شرکت صنایع بسته‌بندی و پلاستیک پارس",
+    "lines": [
+      {
+        "row_no": 1,
+        "account_code": "110401",
+        "account_title": "موجودی مواد اولیه و ملزومات بسته‌بندی - انبار مرکزی",
+        "description": "ثبت بهای خالص کالای سالم تحویل‌شده طبق قبض انبار و نرخ مصوب PO-2026-101",
+        "debit_rials": 0,
+        "credit_rials": 0
+      },
+      {
+        "row_no": 2,
+        "account_code": "110802",
+        "account_title": "پیش‌پرداخت مالیات و عوارض بر ارزش افزوده خرید معتبر",
+        "description": "ثبت ۱۰٪ مالیات و عوارض ارزش افزوده قانونی مورد تایید ممیزی",
+        "debit_rials": 0,
+        "credit_rials": 0
+      },
+      {
+        "row_no": 3,
+        "account_code": "210905",
+        "account_title": "حساب کنترلی کسورات، ضایعات حمل و برگشت از خرید",
+        "description": "اعلامیه بدهکار تامین‌کننده بابت کسری انبار، انحراف نرخ و اصلاح مالیات (شرکت صنایع بسته‌بندی و پلاستیک پارس)",
+        "debit_rials": 129500000,
+        "credit_rials": 0
+      },
+      {
+        "row_no": 4,
+        "account_code": "210101",
+        "account_title": "حساب‌های پرداختنی تجاری - تامین‌کنندگان داخلی",
+        "description": "بستانکاری خالص قابل پرداخت به تامین‌کننده پس از کسر مغایرت‌ها (شرکت صنایع بسته‌بندی و پلاستیک پارس)",
+        "debit_rials": 0,
+        "credit_rials": 0
+      },
+      {
+        "row_no": 5,
+        "account_code": "210905",
+        "account_title": "ذخیره تسویه ادعا و کسورات صورتحساب (شرکت صنایع بسته‌بندی و پلاستیک پارس)",
+        "description": "بستن طرف حساب کنترلی کسورات صورتحساب ارسالی فروشنده",
+        "debit_rials": 0,
+        "credit_rials": 129500000
+      }
+    ],
+    "total_debit_rials": 129500000,
+    "total_credit_rials": 129500000,
+    "is_balanced": true
+  }
+}
